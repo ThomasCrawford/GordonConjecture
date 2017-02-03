@@ -4,11 +4,10 @@ import cmath
 import fractions
 from termcolor import colored
 
-print colored('hello', 'red'), colored('world', 'green')
 
-
-twoCuspMfld = 's647'
-r = 6
+twoCuspMfld = 's785'
+r = 20
+whichCusp = 1
 
 def reformatNumber ( snappyNumber ):
 	imag = float(snappyNumber.imag())
@@ -22,41 +21,40 @@ def coprimes (s, xTranslation, yTranslation):
 			if fractions.gcd(a,b)==1:
 				pairs.append([a,b])
 				pairs.append([-a,b])
-	return sorted(pairs, key = lambda x: float(abs(x[1]))+float(abs(x[0])))
+	return sorted(pairs, key = lambda x: float(abs( x[1]*xTranslation + x[0]*yTranslation)))
 	# return sorted(pairs, key = lambda x: float(abs(x[1]))+float(abs(x[0])))
+
+def cutoffColor( x ):
+	if x > 5.24: return colored(x, 'red')
+	else: return colored(x, 'green')
+
 
 M = snappy.Manifold(twoCuspMfld)
 print M.identify()
 C=M.cusp_neighborhood()
 
-yFristTranslation = reformatNumber(C.all_translations()[0][0])
-xFirstTranslation = reformatNumber(C.all_translations()[0][1])
+xTranslation = reformatNumber(C.all_translations()[whichCusp][1])
+yTranslation = reformatNumber(C.all_translations()[whichCusp][0])
 
-surgeryLength = abs(2*yFristTranslation+3*xFirstTranslation)
-print type(surgeryLength)
-
- 
 greaterThan = []
 lessThan = []
 notHyp = []
 miss = []
 
-for [i,j] in coprimes(r , xFirstTranslation, yFristTranslation):
+for [i,j] in coprimes(r , xTranslation, yTranslation):
 	# print i,j
 	M = snappy.Manifold(twoCuspMfld)
-	M.dehn_fill((i,j),0)
+	M.dehn_fill((i,j),whichCusp)
 	if M.volume() > 0.5:
 		try:
 			C = M.cusp_neighborhood()
 			C.set_displacement(100)
-			surgeryLength = abs(i*yFristTranslation+j*xFirstTranslation)
+			surgeryLength = abs(i*yTranslation+j*xTranslation)
 			cuspArea = C.volume()*2
-			if C.volume()<2.621:
-				print "{0:.3f}".format(surgeryLength) + '   ' + colored(cuspArea, 'green')
-				lessThan.append((i,j))
-			else: 
-				print "{0:.3f}".format(surgeryLength) + '   ' + colored(cuspArea, 'red')
-				greaterThan.append((i,j))
+			print "{0:.3f}".format(surgeryLength) + '\t' + cutoffColor(cuspArea) + '\t' + str((i,j))
+			if C.volume()<2.6201: lessThan.append((i,j))
+			else:  greaterThan.append((i,j))
+
 		except:
 			print 'Failed to construct cusp for ' + str((i,j)) +' surgery' 
 			miss.append((i,j))
