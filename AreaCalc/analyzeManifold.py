@@ -1,13 +1,13 @@
 import snappy
-import hikmot
+# import hikmot
 import cmath
 import fractions
 from termcolor import colored
 
 
-twoCuspMfld = 's785'
-r = 20
-whichCusp = 1
+twoCuspMfld = 's647'
+r = 7
+whichCusp = 0
 
 def reformatNumber ( snappyNumber ):
 	imag = float(snappyNumber.imag())
